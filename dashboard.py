@@ -213,7 +213,7 @@ with st.expander("View Data"):
 #    st.write(filtered_df.iloc[:500,1:20:2].style.background_gradient(cmap="Oranges"))                         
 
 # Download original DataSet
-csv = df.to_csv(index= False).encode('utf-8')
-st.download_button('Download data', data=csv, file_name = "Data.csv", mime="text/csv")
+#xls = df.to_xls(index= False).encode('utf-8')
+#st.download_button('Download data', data=xls, file_name = "Data.xls", mime="text/csv")
 
 
