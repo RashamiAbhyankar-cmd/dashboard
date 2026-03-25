@@ -184,7 +184,7 @@ st.dataframe(srch_df, use_container_width=True)
 import plotly.figure_factory as ff
 st.subheader(":point_right: Month wise Sub-Category sales Summary")
 with st.expander("Summary_Table"):
-    df_sample = df[0:5][["ï»¿Tracking No","Date Received","Aging","Status","Plant / Field return","End Model Number","Root Cause"]]
+    df_sample = df[0:5][["Tracking No","Date Received","Aging","Status","Plant / Field return","End Model Number","Root Cause"]]
     fig5 = ff.create_table(df_sample, colorscale="Cividis")
     st.plotly_chart(fig5, use_container_width=True)
     
