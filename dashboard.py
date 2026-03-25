@@ -190,8 +190,8 @@ with st.expander("Summary_Table"):
     
     st.markdown("Month wise Aging Table")
     df4["month"] = df4["Date Received"].dt.month_name()
-    Date Received_Year = pd.pivot_table (data = df4, values="Aging", index = ["Model"], columns="month")
-    st.write(Date_Received__Year.style.background_gradient(cmap="Blues"))
+   # Date Received_Year = pd.pivot_table (data = df4, values="Aging", index = ["Model"], columns="month")
+   # st.write(Date_Received__Year.style.background_gradient(cmap="Blues"))
     
 #  Create a Scatter Plot                                 
 data1 = px.scatter(df4, x = "Date Received", y = "Aging")
