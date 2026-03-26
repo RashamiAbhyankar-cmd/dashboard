@@ -33,13 +33,21 @@ if fl is not None:
     st.write(filename)
     #df = pd.read_csv(filename, encoding= "ISO-8859-1") 
     # for csv...^....
+    xl=pd.ExcelFile(filename)
     df = pd.read_excel(filename)
     # for eXCEL FILES...^....
 else:
+    filename = "SCRDataExcel.xlsx"
     #os.chdir(r"C:\Users\Acer\OneDrive\Desktop\SNA\Python\CDashB")
     #os.chdir(r"!git clone https://github.com/RashamiAbhyankar-cmd/dashboard")
     #df = pd.read_csv("SCRData.csv", encoding="ISO-8859-1")
+    xl= pd.ExcelFile(filename)
     df = pd.read_excel("SCRDataExcel.xlsx")
+
+#select Tab
+sheet_name = st.selectbox("SElect a tab", xl.sheet_names)
+
+df=pd.read_excel(filename, sheet_name=sheet_name)
 
 col1, col2 = st.columns((2))
 df["Date Received"] = pd.to_datetime(df["Date Received"])
@@ -209,7 +217,6 @@ styled = sub_category_Year.style.background_gradient(cmap="Blues")
 
 # Render styled HTML table
 st.markdown(styled.to_html(), unsafe_allow_html=True)
-
 
 #  Create a Scatter Plot                                 
 data1 = px.scatter(df4, x = "Date Received", y = "Aging")
