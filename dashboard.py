@@ -194,12 +194,23 @@ with st.expander("Summary_Table"):
     fig5 = ff.create_table(df_sample, colorscale="Cividis")
     st.plotly_chart(fig5, use_container_width=True)
     
-    st.markdown("Month wise Aging Table")
-    df4["month"] = df4["Date Received"].dt.month_name()
-    sub_category_Year = pd.pivot_table (data = df4, values="Aging", index = ["Model"], columns="month")
-    #st.write(sub_category_Year.style.background_gradient(cmap="Blues"))
-    styled = sub_category_Year.style.background_gradient(cmap="Blues")
-    st.write(styled.to_html(), unsafe_allow_html=True)
+ st.markdown("### Month-wise Aging Table")
+
+df4["month"] = df4["Date Received"].dt.month_name()
+
+sub_category_Year = pd.pivot_table(
+    data=df4,
+    values="Aging",
+    index=["Model"],
+    columns="month"
+)
+
+styled = sub_category_Year.style.background_gradient(cmap="Blues")
+
+# Render styled HTML table
+st.markdown(styled.to_html(), unsafe_allow_html=True)
+
+
 #  Create a Scatter Plot                                 
 data1 = px.scatter(df4, x = "Date Received", y = "Aging")
 fig.update_layout(
