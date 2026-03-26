@@ -3,6 +3,7 @@ import plotly.express as px
 import pandas as pd
 import os
 import warnings
+from io import BytesIO
 warnings.filterwarnings('ignore')
 # s:\Operations\13) CPE ECU\1.Returns......ECU Return Tracker
 st.set_page_config(page_title="CDashB!!!", page_icon=":bar_chart:", layout="wide")
@@ -30,7 +31,10 @@ fl = st.file_uploader(":file_folder:Upload a file", type=(["csv","txt","xlsx","x
 if fl is not None:
     filename = fl.name
     st.write(filename)
-    df = pd.read_csv(filename, encoding= "ISO-8859-1")
+    #df = pd.read_csv(filename, encoding= "ISO-8859-1") 
+    # for csv...^....
+    df = pd.read_excel(filename)
+    # for eXCEL FILES...^....
 else:
     #os.chdir(r"C:\Users\Acer\OneDrive\Desktop\SNA\Python\CDashB")
     #os.chdir(r"!git clone https://github.com/RashamiAbhyankar-cmd/dashboard")
@@ -182,16 +186,18 @@ st.write(f"Showing {len(srch_df)} results:")
 st.dataframe(srch_df, use_container_width=True)
 
 import plotly.figure_factory as ff
-st.subheader(":point_right: Month wise Sub-Category sales Summary")
+st.subheader(":point_right: Warranty Returns Units Summary")
 with st.expander("Summary_Table"):
+    #df_sample = df[0:5][["ï»¿Tracking No","Date Received","Aging","Status","Plant / Field return","End Model Number","Root Cause"]] 
+    # ^ above of rcsv files
     df_sample = df[0:5][["Tracking No","Date Received","Aging","Status","Plant / Field return","End Model Number","Root Cause"]]
     fig5 = ff.create_table(df_sample, colorscale="Cividis")
     st.plotly_chart(fig5, use_container_width=True)
     
     st.markdown("Month wise Aging Table")
     df4["month"] = df4["Date Received"].dt.month_name()
-   # Date Received_Year = pd.pivot_table (data = df4, values="Aging", index = ["Model"], columns="month")
-   # st.write(Date_Received__Year.style.background_gradient(cmap="Blues"))
+    sub_category_Year = pd.pivot_table (data = df4, values="Aging", index = ["Model"], columns="month")
+    st.write(sub_category_Year.style.background_gradient(cmap="Blues"))
     
 #  Create a Scatter Plot                                 
 data1 = px.scatter(df4, x = "Date Received", y = "Aging")
@@ -209,11 +215,26 @@ fig.update_yaxes(
     title = dict(text= "Aging", font = dict(size=19))
 )   
 st.plotly_chart(data1, use_container_width=True)  
-#with st.expander("View Data"):
-#    st.write(filtered_df.iloc[:500,1:20:2].style.background_gradient(cmap="Oranges"))                         
+with st.expander("View Data"):
+    st.write(filtered_df.iloc[:500,1:20:2].style.background_gradient(cmap="Oranges"))                         
 
 # Download original DataSet
-#xls = df.to_xls(index= False).encode('utf-8')
-#st.download_button('Download data', data=xls, file_name = "Data.xls", mime="text/csv")
+#csv = df.to_csv(index= False).encode('utf-8')
+#st.download_button('Download data', data=csv, file_name = "Data.csv", mime="text/csv")
 
+#xls = df.to_excel(index= False, engine='excel_writer')
+#st.download_button('Download data', data=xls, file_name = "Data.xls", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
+buffer = BytesIO()
+
+with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+
+buffer.seek(0)
+
+st.download_button(
+    label="Download data",
+    data=buffer,
+    file_name="output.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
