@@ -194,7 +194,7 @@ with st.expander("Summary_Table"):
     fig5 = ff.create_table(df_sample, colorscale="Cividis")
     st.plotly_chart(fig5, use_container_width=True)
     
- st.markdown("### Month-wise Aging Table")
+st.markdown("### Month-wise Aging Table")
 
 df4["month"] = df4["Date Received"].dt.month_name()
 
