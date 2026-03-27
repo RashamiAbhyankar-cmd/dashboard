@@ -4,6 +4,8 @@ import pandas as pd
 import os
 import warnings
 from io import BytesIO
+import numpy as np
+import plotly.graph_objects as go
 warnings.filterwarnings('ignore')
 # s:\Operations\13) CPE ECU\1.Returns......ECU Return Tracker
 st.set_page_config(page_title="CDashB!!!", page_icon=":bar_chart:", layout="wide")
@@ -44,14 +46,13 @@ else:
     xl= pd.ExcelFile(filename)
     df = pd.read_excel("SCRDataExcel.xlsx")
 
+
+
 #select Tab
-sheet_name = st.selectbox("SElect a tab", xl.sheet_names)
-#df=pd.read_excel(filename, sheet_name=sheet_name)
-#select Tab
-#sheet_name = st.selectbox("Select a tab", xl.sheet_names)
+sheet_name = st.selectbox("Select a tab", xl.sheet_names)
+
 df=pd.read_excel(filename, sheet_name=sheet_name)
 st.subheader(f"Tab selected: {sheet_name}")
-
 
 col1, col2 = st.columns((2))
 df["Date Received"] = pd.to_datetime(df["Date Received"])
@@ -230,17 +231,58 @@ fig.update_layout(
         font = dict(size=20)
     )
 )  
-
 fig.update_xaxes(
     title = dict(text = "Date Received", font=dict(size=19))
 ) 
 fig.update_yaxes(
     title = dict(text= "Aging", font = dict(size=19))
 )   
-st.plotly_chart(data1, use_container_width=True)  
+st.plotly_chart(data1, use_container_width=True) 
+ 
+# data view
 with st.expander("View Data"):
     st.write(filtered_df.iloc[:500,1:20:2].style.background_gradient(cmap="Oranges"))                         
 
+#Bar Chart
+# 1. Prepare Data
+df4["Date Received"] = pd.to_datetime(df4["Date Received"])
+df4_sorted = df4.sort_values(by="Date Received", ascending=True, ignore_index=True)
+df4_sorted["DateText"] = df4_sorted["Date Received"].dt.strftime("%Y-%m-%d")
+#df4_reset = df4_sorted.reset_index()
+st.dataframe(df4_sorted)
+# 2. Create the Bar Chart (Assigning to 'fig')
+#fig8 = px.bar(df4_sorted, x="Date Received", y="Aging")
+#fig8 = px.bar(df4_sorted, x="Date Received", y="Aging")
+fig8 = px.bar(df4_sorted, x="DateText", y="Aging")
+# 3. Calculate Trendline
+# Note: np.arange (one 'r') and ensure you use df4_reset consistently
+x_numeric = np.arange(len(df4_sorted))
+z = np.polyfit(x_numeric, df4_sorted["Aging"], 1)
+p = np.poly1d(z)
+trendline_values = p(x_numeric)
+
+# 4. Add Trendline Trace
+fig8.add_trace(go.Scatter(
+    #x=df4_sorted["Date Received"], 
+    x=df4_sorted["DateText"],
+    y=trendline_values, 
+    mode='lines', 
+    name='Trendline', 
+    line=dict(color='Orange', width=2, dash="dash")
+))
+
+# 5. Update Layout & Labels
+fig8.update_layout(
+    title=dict(text="Date Received and Aging", font=dict(size=20)),
+    xaxis_title="Date Received",
+    yaxis_title="Aging",
+    font=dict(size=14)
+)
+fig8.update_xaxes(type='category')
+# 6. Render in Streamlit
+st.plotly_chart(fig8, use_container_width=True)
+
+    
 # Download original DataSet
 #csv = df.to_csv(index= False).encode('utf-8')
 #st.download_button('Download data', data=csv, file_name = "Data.csv", mime="text/csv")
