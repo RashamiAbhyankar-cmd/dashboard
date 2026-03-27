@@ -46,8 +46,12 @@ else:
 
 #select Tab
 sheet_name = st.selectbox("SElect a tab", xl.sheet_names)
-
+#df=pd.read_excel(filename, sheet_name=sheet_name)
+#select Tab
+#sheet_name = st.selectbox("Select a tab", xl.sheet_names)
 df=pd.read_excel(filename, sheet_name=sheet_name)
+st.subheader(f"Tab selected: {sheet_name}")
+
 
 col1, col2 = st.columns((2))
 df["Date Received"] = pd.to_datetime(df["Date Received"])
