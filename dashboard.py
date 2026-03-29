@@ -163,7 +163,16 @@ with st.expander("View Data of TimeSeries:"):
     st.write(linechart.T.style.background_gradient(cmap="Oranges"))
     csv = linechart.to_csv(index=False).encode("utf-8")
     st.download_button('Download Data', data = csv, file_name="TimeSeriesAging.csv", mime = 'text/csv')
-
+# Search by Keyword for Tracking Number
+st.subheader("Search by Keyword by Tracking Number")
+df['Tracking No'] = df['Tracking No'].astype(str).str.replace(',', '')
+search_query = st.text_input("Enter Tracking Number to Search", "")
+if search_query:
+    search_df = df[df["Tracking No"].str.contains(search_query, case=False, na=False)]
+else:
+    search_df = df[df["Tracking No"].str.contains("E-W", case=False, na=False)]
+st.write(f"Showing {len(search_df)} results:")
+st.dataframe(search_df, use_container_width=True)
 
 #Search by Keyword for Failure by Defective part Number or Model Number
 df['Defective component  P/No'] = df['Defective component  P/No'].astype(str).str.replace(',', '')
@@ -244,6 +253,7 @@ with st.expander("View Data"):
     st.write(filtered_df.iloc[:500,1:20:2].style.background_gradient(cmap="Oranges"))                         
 
 #Bar Chart
+
 # 1. Prepare Data
 df4["Date Received"] = pd.to_datetime(df4["Date Received"])
 df4_sorted = df4.sort_values(by="Date Received", ascending=True, ignore_index=True)
@@ -253,6 +263,8 @@ st.dataframe(df4_sorted)
 # 2. Create the Bar Chart (Assigning to 'fig')
 #fig8 = px.bar(df4_sorted, x="Date Received", y="Aging")
 #fig8 = px.bar(df4_sorted, x="Date Received", y="Aging")
+color_map={'Open':'blue', 'Closed':'green'}
+#fig8 = px.bar(df4_sorted, x="DateText", y="Aging", color="Status", color_discrete_map=color_map) #change this one
 fig8 = px.bar(df4_sorted, x="DateText", y="Aging")
 # 3. Calculate Trendline
 # Note: np.arange (one 'r') and ensure you use df4_reset consistently
@@ -279,16 +291,131 @@ fig8.update_layout(
     font=dict(size=14)
 )
 fig8.update_xaxes(type='category')
+color_map={'Open':'blue', 'Closed':'green'}
+
 # 6. Render in Streamlit
+
 st.plotly_chart(fig8, use_container_width=True)
 
-    
-# Download original DataSet
-#csv = df.to_csv(index= False).encode('utf-8')
-#st.download_button('Download data', data=csv, file_name = "Data.csv", mime="text/csv")
+# Horizintal Bar Chart
+#st.subheader("Bar Chart - Aging Time Analysis")..# this worked...
+#fig8 = px.bar(df4_sorted, x="DateText", y="Aging", horizontal = True)
+#fig8.update_xaxes (type = 'category')
+color_map={'Open':'#0000FF', 'Closed':'#008000'}
+#fig9 = px.bar(df4_sorted, x="DateText", y="Aging", color="Status", color_discrete_map=color_map, orientation='v' )
+#fig9 = px.bar(df4_sorted, x="Aging", y="DateText", color="Status", color_discrete_map=color_map, orientation='h' )
+#fig9.update_yaxes(type='category')
+#st.bar_chart(df4_sorted, x="DateText", y="Aging", color= "Status",horizontal=True ) #..this worked
 
-#xls = df.to_excel(index= False, engine='excel_writer')
-#st.download_button('Download data', data=xls, file_name = "Data.xls", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+# Compute averages and targets
+avg_aging = df4_sorted["Aging"].mean()
+aging_target = 30
+
+extra_rows = pd.DataFrame({
+    "Tracking No": ["Average Aging", "Aging Target"],
+    "Aging": [avg_aging, aging_target],
+    "Status": ["Average", "Target"]
+})
+df4_sorted = pd.concat([df4_sorted, extra_rows], ignore_index=True)
+
+# Color map
+color_map = {
+    "Open": "#0000FF",
+    "Closed": "#00FF00",
+    "Average": "#34F30E",
+    "Target": "#F0D884"
+}
+
+# --- Build Figure ---
+fig10 = go.Figure()
+
+
+# 1) Main Aging bars
+
+fig10.add_trace(go.Bar(
+    x=df4_sorted["Aging"],
+    y=df4_sorted["Tracking No"],
+    name="Open" if df4_sorted["Status"].iloc[0] == "Open" else "Closed",
+    marker_color=[color_map.get(s, "#3CF213") for s in df4_sorted["Status"]],
+    orientation='h',
+    opacity=1.0,
+    text=df4_sorted["Aging"],
+    textposition='outside'
+))
+
+fig10.add_trace(go.Bar(
+    #x=df4_sorted["Aging"],
+    x = [None] * len(df4_sorted),  # No bars for this trace, just for legend
+    #y=df4_sorted["Tracking No"],
+    y = [None] * len(df4_sorted),  # No bars for this trace, just for legend
+    name="Open",
+    marker_color="blue",
+    orientation='h',
+    opacity=1.0,
+    text=df4_sorted["Aging"],
+    textposition='outside'
+))
+
+# 2) Average Aging bar (single horizontal line)
+
+#fig10.add_trace(go.Bar(
+#    x=[avg_aging] * len(df4_sorted),
+#    y=df4_sorted["Tracking No"],
+#    name="Average Aging",
+#    marker_color=color_map["Average"],
+#    orientation='h',
+#    opacity=0.4
+#))
+
+# 3) Aging Target bar (single horizontal line)
+fig10.add_trace(go.Bar(
+    x=[aging_target] * len(df4_sorted),
+    y=df4_sorted["Tracking No"],
+    name="Aging Target=30 days",
+    marker_color=color_map["Target"],
+    #color_continuous_scale=px.colors.sequential.Viridis,
+    orientation='h',
+    opacity=0.4,  
+    showlegend=True
+    #text= df4_sorted["Aging"].apply(lambda x: f"{x:.1f}"),  # Add text labels with one decimal place
+    
+))
+fig10.add_vline(
+    x=aging_target,
+    line_width=3,
+    line_dash="dash",
+    line_color="#F7C203",
+    annotation_text="Target",
+    annotation_position="top right"
+)
+
+
+
+# Layout
+fig10.update_layout(
+    barmode='overlay',
+    title="Aging by Tracking No. with Average and Target",
+    xaxis_title="Aging (Days)",
+    yaxis_title="Tracking No.",
+    font=dict(size=14),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+)
+st.subheader("Bar Chart - Aging Time Analysis")
+st.plotly_chart(fig10, use_container_width=True)
+# Dataset Table
+st.subheader("Data Table - Aging Time Analysis")
+fig10.update_layout(bargap=0.75) 
+st.dataframe(df4_sorted[["Tracking No", "Aging", "Status"]],use_container_width=True,
+    column_config={
+        "Tracking No": st.column_config.TextColumn(),
+        "Aging": st.column_config.NumberColumn(),
+        "Status": st.column_config.TextColumn(),
+    }
+)
+
+# Another Way for same Chart...Now using st.bar_chart for horizontal bars with color by Status
+st.subheader("Bar Chart - Aging Time Analysis.....another way using st.bar_chart")
+st.bar_chart(df4_sorted, x="Tracking No", y="Aging", color="Status", horizontal=True)
 
 buffer = BytesIO()
 
