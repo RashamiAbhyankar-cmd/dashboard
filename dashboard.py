@@ -355,6 +355,18 @@ fig10.add_trace(go.Bar(
     text=df4_sorted["Aging"],
     textposition='outside'
 ))
+fig10.add_trace(go.Bar(
+    #x=df4_sorted["Aging"],
+    x = [None] * len(df4_sorted),  # No bars for this trace, just for legend
+    #y=df4_sorted["Tracking No"],
+    y = [None] * len(df4_sorted),  # No bars for this trace, just for legend
+    name="Average Aging",
+    marker_color="#F6BE00",
+    orientation='h',
+    opacity=1.0,
+    text=df4_sorted["Aging"],
+    textposition='outside'
+))
 
 # 2) Average Aging bar (single horizontal line)
 
