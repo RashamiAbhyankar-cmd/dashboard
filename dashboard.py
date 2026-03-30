@@ -308,7 +308,7 @@ color_map={'Open':'#0000FF', 'Closed':'#008000'}
 #st.bar_chart(df4_sorted, x="DateText", y="Aging", color= "Status",horizontal=True ) #..this worked
 
 # Compute averages and targets
-avg_aging = df4_sorted["Aging"].mean()
+avg_aging = round(df4_sorted["Aging"].mean(), 1)
 aging_target = 30
 
 extra_rows = pd.DataFrame({
