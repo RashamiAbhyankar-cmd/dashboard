@@ -410,7 +410,7 @@ fig10.update_layout(
     xaxis_title="Aging (Days)",
     yaxis_title="Tracking No.",
     font=dict(size=14),
-    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0)
 )
 st.subheader("Bar Chart - Aging Time Analysis")
 st.plotly_chart(fig10, use_container_width=True)
