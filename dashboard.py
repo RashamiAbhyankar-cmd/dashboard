@@ -322,7 +322,7 @@ df4_sorted = pd.concat([df4_sorted, extra_rows], ignore_index=True)
 color_map = {
     "Open": "#0000FF",
     "Closed": "#00FF00",
-    "Average": "#34F30E",
+    "Average": "#F6BE00",
     "Target": "#F0D884"
 }
 
